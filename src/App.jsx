@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useParams, Navigate, useLocation } from 'react-router-dom';
 
-// --- IMPORTY TVÝCH DAT ---
-import { allData } from './data'; // Obsahuje: Základy, Majetek, Zdroje, Rozvaha, Účtování
-import { prikladyData } from './data/prikladyData'; // Trenažér
-import { maDatiDalData } from './data/matidal'; // MD / Dal
+// --- IMPORTY PŘESNĚ PODLE TVÉ STRUKTURY (OBRÁZEK 1) ---
+import { zakladyData } from './data/zaklady';
+import { majetekData } from './data/majetek';
+import { zdrojeData } from './data/zdroje';
+import { rozvahaData } from './data/rozvaha';
+import { uctovaniData } from './data/uctovani';
+import { matidalData } from './data/matidal';
+import { prikladyData } from './data/prikladyData';
 
-// Sjednocení všech 7 kapitol přesně podle tvého zadání
+// Sjednocení všech 7 modulů do jednoho pole pro hlavní stránku
 const finalData = [
-  ...allData,       // 1.-5. kapitola
-  maDatiDalData,    // 6. kapitola
-  prikladyData      // 7. kapitola
+  zakladyData,    // 1.
+  majetekData,    // 2.
+  zdrojeData,     // 3.
+  rozvahaData,    // 4.
+  uctovaniData,   // 5.
+  matidalData,    // 6.
+  prikladyData    // 7.
 ];
 
 // --- KOMPONENTA: INTERAKTIVNÍ TRENAŽÉR ---
@@ -45,7 +53,7 @@ function PracticeSection({ cviceni }) {
             <span className="text-[9px] font-black uppercase ml-2 text-zinc-500">Má Dáti (MD)</span>
             <input 
               placeholder="???" value={input.md} onChange={e => setInput({...input, md: e.target.value})} disabled={checked}
-              className={`w-full p-5 rounded-2xl border-2 text-center font-mono font-black text-xl outline-none transition-all shadow-sm
+              className={`w-full p-5 rounded-2xl border-2 text-center font-mono font-black text-xl outline-none transition-all
                 ${checked ? (input.md.trim() === curr.md ? 'border-green-500 bg-green-50 text-green-700' : 'border-red-500 bg-red-50 text-red-700') 
                 : 'bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 focus:border-blue-500 dark:text-white'}`}
             />
@@ -54,7 +62,7 @@ function PracticeSection({ cviceni }) {
             <span className="text-[9px] font-black uppercase ml-2 text-zinc-500">Dal (D)</span>
             <input 
               placeholder="???" value={input.d} onChange={e => setInput({...input, d: e.target.value})} disabled={checked}
-              className={`w-full p-5 rounded-2xl border-2 text-center font-mono font-black text-xl outline-none transition-all shadow-sm
+              className={`w-full p-5 rounded-2xl border-2 text-center font-mono font-black text-xl outline-none transition-all
                 ${checked ? (input.d.trim() === curr.d ? 'border-green-500 bg-green-50 text-green-700' : 'border-red-500 bg-red-50 text-red-700') 
                 : 'bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 focus:border-blue-500 dark:text-white'}`}
             />
@@ -64,14 +72,14 @@ function PracticeSection({ cviceni }) {
         <div className={`p-6 rounded-2xl mb-8 animate-in fade-in slide-in-from-top-2 ${isCorrect ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
           <p className="font-black uppercase text-[10px] mb-1">{isCorrect ? 'Výborně!' : 'Pozor, chyba'}</p>
           <p className="text-sm font-bold leading-relaxed">{curr.text}</p>
-          {!isCorrect && <p className="mt-2 text-xs font-mono font-black">Správné řešení: {curr.md} / {curr.d}</p>}
+          {!isCorrect && <p className="mt-2 text-xs font-mono font-black">Správně: {curr.md} / {curr.d}</p>}
         </div>
       )}
       <button 
         onClick={checked ? handleNext : () => setChecked(true)} 
-        className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black uppercase text-[11px] tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-95 shadow-lg"
+        className="w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black uppercase text-[11px] tracking-[0.2em] shadow-lg active:scale-95 transition-all"
       >
-        {checked ? 'Další příklad' : 'Zkontrolovat výsledek'}
+        {checked ? 'Další příklad' : 'Zkontrolovat'}
       </button>
     </div>
   );
@@ -84,9 +92,9 @@ function FlashcardsSection({ otazky }) {
   if (!otazky) return null;
   return (
     <div className="mt-12 p-10 border-2 border-dashed border-zinc-300 dark:border-zinc-800 rounded-[3rem] text-center bg-zinc-50/50 dark:bg-transparent">
-      <p className="text-[10px] font-black uppercase text-blue-600 mb-8 tracking-[0.3em]">Flashcards / Teorie</p>
+      <p className="text-[10px] font-black uppercase text-blue-600 mb-8 tracking-[0.3em]">Flashcards</p>
       <div className="min-h-[140px] flex flex-col items-center justify-center">
-        <p className="text-2xl font-black text-zinc-900 dark:text-white mb-8 px-4 leading-tight">{otazky[index].q}</p>
+        <p className="text-2xl font-black text-zinc-900 dark:text-white mb-8 leading-tight">{otazky[index].q}</p>
         {show && (
           <div className="mb-8 p-6 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-blue-100 dark:border-blue-900/30 animate-in zoom-in-95">
             <p className="font-bold text-blue-600 dark:text-blue-400">{otazky[index].a}</p>
@@ -95,7 +103,7 @@ function FlashcardsSection({ otazky }) {
       </div>
       <button 
         onClick={() => show ? (setShow(false), setIndex((index + 1) % otazky.length)) : setShow(true)} 
-        className="px-12 py-4 rounded-full bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700 text-[10px] font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all active:scale-95"
+        className="px-12 py-4 rounded-full bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700 text-[10px] font-black uppercase tracking-widest shadow-md active:scale-95 transition-all"
       >
         {show ? 'Další otázka' : 'Ukázat odpověď'}
       </button>
@@ -103,7 +111,7 @@ function FlashcardsSection({ otazky }) {
   );
 }
 
-// --- LAYOUT LEKCE (VYSOUVACÍ BURGER MENU) ---
+// --- LAYOUT LEKCE (S BURGER MENU) ---
 function TemaLayout({ isDark, setIsDark }) {
   const { temaId, podtemaId } = useParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -114,19 +122,19 @@ function TemaLayout({ isDark, setIsDark }) {
   const podtema = tema.podtemata.find(p => p.id === podtemaId) || tema.podtemata[0];
 
   useEffect(() => {
-    setIsMenuOpen(false); // Zavřít menu při změně stránky
+    setIsMenuOpen(false);
   }, [location]);
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 transition-colors">
       
-      {/* OVERLAY */}
+      {/* Overlay */}
       <div 
         className={`fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsMenuOpen(false)}
       />
 
-      {/* DRAWER SIDEBAR */}
+      {/* Drawer Menu */}
       <aside className={`
         fixed top-0 left-0 z-[70] h-screen w-80 bg-white dark:bg-zinc-950 
         border-r border-zinc-200 dark:border-zinc-900 p-8 overflow-y-auto 
@@ -138,7 +146,7 @@ function TemaLayout({ isDark, setIsDark }) {
           <button onClick={() => setIsMenuOpen(false)} className="text-zinc-400 p-2 text-xl font-bold">✕</button>
         </div>
         
-        <h2 className="text-xl font-black mb-8 uppercase tracking-tighter leading-tight text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-900 pb-6">{tema.titul}</h2>
+        <h2 className="text-xl font-black mb-8 uppercase tracking-tighter leading-tight border-b border-zinc-100 dark:border-zinc-900 pb-6">{tema.titul}</h2>
         <nav className="space-y-4">
           {tema.podtemata.map(p => (
             <Link 
@@ -153,16 +161,14 @@ function TemaLayout({ isDark, setIsDark }) {
       </aside>
 
       <main className="flex-1 max-w-4xl mx-auto p-6 md:p-16 lg:p-24 w-full">
-        {/* HORNÍ NAVIGAČNÍ PANEL */}
         <div className="flex justify-between items-center mb-12">
           <button 
             onClick={() => setIsMenuOpen(true)}
-            className="flex items-center gap-3 px-5 py-3 bg-zinc-100 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 font-black text-[10px] uppercase tracking-widest shadow-sm"
+            className="flex items-center gap-3 px-5 py-3 bg-zinc-100 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 font-black text-[10px] uppercase tracking-widest"
           >
-            ☰ Menu lekcí
+            ☰ Seznam lekcí
           </button>
           <div className="text-right">
-             <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.3em] block mb-1">Postup</span>
              <div className="w-24 h-1 bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-600 transition-all" style={{ width: `${((tema.podtemata.indexOf(podtema) + 1) / tema.podtemata.length) * 100}%` }}></div>
              </div>
@@ -193,7 +199,7 @@ function Home({ isDark, setIsDark }) {
         <header className="flex justify-between items-end mb-24 border-b border-zinc-200 dark:border-zinc-900 pb-12">
           <div>
             <span className="text-blue-600 font-black text-[10px] uppercase tracking-[0.5em] block mb-2 italic">Student Portal</span>
-            <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none uppercase">Účto</h1>
+            <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none uppercase italic">Účto</h1>
           </div>
           <button onClick={() => setIsDark(!isDark)} className="mb-2 p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500">
             {isDark ? '🌙 Dark' : '☀️ Light'}
@@ -207,7 +213,7 @@ function Home({ isDark, setIsDark }) {
               to={`/${t.id}/${t.podtemata[0].id}`} 
               className={`p-10 rounded-[2.5rem] border-2 transition-all group flex flex-col justify-between min-h-[300px] shadow-sm hover:shadow-2xl hover:-translate-y-2
                 ${t.id === 'priklady-uctovani' 
-                  ? 'border-blue-600 bg-blue-600 text-white shadow-blue-500/20' 
+                  ? 'border-blue-600 bg-blue-600 text-white' 
                   : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30 dark:text-white'}`}
             >
               <div>
@@ -216,12 +222,7 @@ function Home({ isDark, setIsDark }) {
                   {t.titul}
                 </h2>
               </div>
-              <div>
-                <div className={`h-1 w-12 mb-4 transition-all group-hover:w-24 ${t.id === 'priklady-uctovani' ? 'bg-white/40' : 'bg-blue-600'}`}></div>
-                <p className={`text-[10px] font-black uppercase tracking-widest ${t.id === 'priklady-uctovani' ? 'text-white/60' : 'text-zinc-400'}`}>
-                  {t.podtemata.length} lekcí
-                </p>
-              </div>
+              <div className={`h-1 w-12 mb-4 group-hover:w-24 transition-all ${t.id === 'priklady-uctovani' ? 'bg-white/40' : 'bg-blue-600'}`}></div>
             </Link>
           ))}
         </div>
@@ -230,16 +231,13 @@ function Home({ isDark, setIsDark }) {
   );
 }
 
-// --- HLAVNÍ KOMPONENTA APP ---
+// --- APP ---
 export default function App() {
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    if (isDark) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }, [isDark]);
 
   return (
