@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Link, useParams, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, useParams, Navigate, useLocation } from 'react-router-dom';
 
 // Import tvých datových modulů
 import { allData } from './data';
@@ -102,47 +102,49 @@ function FlashcardsSection({ otazky }) {
   );
 }
 
-// --- LAYOUT LEKCE (SIDEBAR + BURGER MENU + OBSAH) ---
+// --- LAYOUT LEKCE (UNIVERZÁLNÍ DRAWER PRO VŠECHNY) ---
 function TemaLayout({ isDark, setIsDark }) {
   const { temaId, podtemaId } = useParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
   
   const tema = finalData.find(t => t.id === temaId);
   if (!tema) return <Navigate to="/" />;
   const podtema = tema.podtemata.find(p => p.id === podtemaId) || tema.podtemata[0];
 
-  const closeMenu = () => setIsMenuOpen(false);
+  // Automaticky zavřít menu při jakékoliv změně URL
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location]);
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 transition-colors">
       
-      {/* OVERLAY (Zatmavení zbytku stránky při otevřeném menu) */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
-          onClick={closeMenu}
-        />
-      )}
+      {/* OVERLAY (Zatmavení pozadí) - Viditelné vždy, když je menu otevřené */}
+      <div 
+        className={`fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setIsMenuOpen(false)}
+      />
 
-      {/* SIDEBAR (Vysouvací na mobilu, pevný na desktopu) */}
+      {/* DRAWER SIDEBAR - Teď se vysouvá pro všechny stejně */}
       <aside className={`
-        fixed lg:sticky top-0 left-0 z-50 h-screen w-72 bg-zinc-50 dark:bg-zinc-950 lg:bg-zinc-50/50 lg:dark:bg-black
-        border-r border-zinc-200 dark:border-zinc-900 p-8 overflow-y-auto transition-transform duration-300 ease-in-out
-        ${isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        fixed top-0 left-0 z-[70] h-screen w-80 bg-white dark:bg-zinc-950 
+        border-r border-zinc-200 dark:border-zinc-900 p-8 overflow-y-auto 
+        transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+        ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex justify-between items-center mb-10">
-          <Link to="/" onClick={closeMenu} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">← Zpět domů</Link>
-          <button onClick={closeMenu} className="lg:hidden text-zinc-400 p-2">✕</button>
+          <Link to="/" className="text-[10px] font-black text-blue-600 uppercase tracking-widest">← Hlavní menu</Link>
+          <button onClick={() => setIsMenuOpen(false)} className="text-zinc-400 hover:text-red-500 transition-colors p-2 text-xl font-bold">✕</button>
         </div>
         
-        <h2 className="text-lg font-black mb-8 uppercase tracking-tighter leading-tight text-zinc-900 dark:text-white">{tema.titul}</h2>
-        <nav className="space-y-5">
+        <h2 className="text-xl font-black mb-8 uppercase tracking-tighter leading-tight text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-900 pb-6">{tema.titul}</h2>
+        <nav className="space-y-4">
           {tema.podtemata.map(p => (
             <Link 
               key={p.id} 
               to={`/${tema.id}/${p.id}`} 
-              onClick={closeMenu}
-              className={`block text-[10px] font-black uppercase tracking-widest transition-all ${podtemaId === p.id ? 'text-blue-600 border-l-2 border-blue-600 pl-4' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 pl-4'}`}
+              className={`block text-[10px] font-black uppercase tracking-widest py-3 px-4 rounded-xl transition-all ${podtemaId === p.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
             >
               {p.titul}
             </Link>
@@ -153,19 +155,25 @@ function TemaLayout({ isDark, setIsDark }) {
       {/* HLAVNÍ OBSAH */}
       <main className="flex-1 max-w-4xl mx-auto p-6 md:p-16 lg:p-24 w-full">
         
-        {/* MOBILNÍ HEADER S TLAČÍTKEM MENU */}
-        <div className="lg:hidden flex justify-between items-center mb-10 pb-6 border-b border-zinc-100 dark:border-zinc-900">
+        {/* FIXNÍ LIŠTA S TLAČÍTKEM MENU */}
+        <div className="flex justify-between items-center mb-12">
           <button 
             onClick={() => setIsMenuOpen(true)}
-            className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg"
+            className="group flex items-center gap-3 px-5 py-3 bg-zinc-100 dark:bg-zinc-900 hover:bg-blue-600 hover:text-white transition-all rounded-2xl border border-zinc-200 dark:border-zinc-800"
           >
-            ☰ Menu
+            <span className="text-lg">☰</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Seznam lekcí</span>
           </button>
-          <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Kapitola {tema.podtemata.indexOf(podtema) + 1}</span>
+          <div className="text-right">
+             <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.3em] block mb-1 italic">Postup</span>
+             <div className="w-24 h-1 bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-600 transition-all" style={{ width: `${((tema.podtemata.indexOf(podtema) + 1) / tema.podtemata.length) * 100}%` }}></div>
+             </div>
+          </div>
         </div>
 
         <header className="mb-12">
-            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] block mb-4 italic">Lekce</span>
+            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] block mb-4 italic">Aktuální kapitola</span>
             <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-zinc-900 dark:text-white leading-[0.95]">{podtema.titul}</h1>
         </header>
 
@@ -187,14 +195,14 @@ function Home({ isDark, setIsDark }) {
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-end mb-24 border-b border-zinc-200 dark:border-zinc-900 pb-12">
           <div>
-            <span className="text-blue-600 font-black text-[10px] uppercase tracking-[0.5em] block mb-2 italic">Vzdělávání</span>
-            <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none">ÚČTO</h1>
+            <span className="text-blue-600 font-black text-[10px] uppercase tracking-[0.5em] block mb-2 italic">Student Portal</span>
+            <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none uppercase">Účto</h1>
           </div>
           <button 
             onClick={() => setIsDark(!isDark)} 
-            className="mb-2 p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 transition-all shadow-sm"
+            className="mb-2 p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:border-blue-500 transition-all shadow-sm"
           >
-            {isDark ? '🌙 Dark' : '☀️ Light'}
+            {isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}
           </button>
         </header>
 
@@ -209,8 +217,8 @@ function Home({ isDark, setIsDark }) {
                   : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30 dark:text-white'}`}
             >
               <div>
-                <span className={`text-[10px] font-black uppercase tracking-widest mb-4 block ${t.id === 'priklady-uctovani' ? 'text-white/60' : 'text-blue-600'}`}>Lekce {idx + 1}</span>
-                <h2 className="text-4xl font-black uppercase tracking-tighter leading-tight group-hover:text-blue-600 transition-colors">
+                <span className={`text-[10px] font-black uppercase tracking-widest mb-4 block ${t.id === 'priklady-uctovani' ? 'text-white/60' : 'text-blue-600'}`}>Modul {idx + 1}</span>
+                <h2 className="text-4xl font-black uppercase tracking-tighter leading-tight transition-colors group-hover:text-blue-600">
                   {t.titul}
                 </h2>
               </div>
