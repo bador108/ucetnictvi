@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useParams, Navigate, useLocation } from 'react-router-dom';
 
-// Import tvých datových modulů
-import { allData } from './data';
-import { prikladyData } from './data/prikladyData';
-import { maDatiDalData } from './data/matidal';
+// --- IMPORTY TVÝCH DAT ---
+import { allData } from './data'; // Obsahuje: Základy, Majetek, Zdroje, Rozvaha, Účtování
+import { prikladyData } from './data/prikladyData'; // Trenažér
+import { maDatiDalData } from './data/matidal'; // MD / Dal
 
+// Sjednocení všech 7 kapitol přesně podle tvého zadání
 const finalData = [
-  ...allData,
-  maDatiDalData,
-  prikladyData
+  ...allData,       // 1.-5. kapitola
+  maDatiDalData,    // 6. kapitola
+  prikladyData      // 7. kapitola
 ];
 
 // --- KOMPONENTA: INTERAKTIVNÍ TRENAŽÉR ---
@@ -102,7 +103,7 @@ function FlashcardsSection({ otazky }) {
   );
 }
 
-// --- LAYOUT LEKCE (UNIVERZÁLNÍ DRAWER PRO VŠECHNY) ---
+// --- LAYOUT LEKCE (VYSOUVACÍ BURGER MENU) ---
 function TemaLayout({ isDark, setIsDark }) {
   const { temaId, podtemaId } = useParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -112,21 +113,20 @@ function TemaLayout({ isDark, setIsDark }) {
   if (!tema) return <Navigate to="/" />;
   const podtema = tema.podtemata.find(p => p.id === podtemaId) || tema.podtemata[0];
 
-  // Automaticky zavřít menu při jakékoliv změně URL
   useEffect(() => {
-    setIsMenuOpen(false);
+    setIsMenuOpen(false); // Zavřít menu při změně stránky
   }, [location]);
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 transition-colors">
       
-      {/* OVERLAY (Zatmavení pozadí) - Viditelné vždy, když je menu otevřené */}
+      {/* OVERLAY */}
       <div 
         className={`fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsMenuOpen(false)}
       />
 
-      {/* DRAWER SIDEBAR - Teď se vysouvá pro všechny stejně */}
+      {/* DRAWER SIDEBAR */}
       <aside className={`
         fixed top-0 left-0 z-[70] h-screen w-80 bg-white dark:bg-zinc-950 
         border-r border-zinc-200 dark:border-zinc-900 p-8 overflow-y-auto 
@@ -134,8 +134,8 @@ function TemaLayout({ isDark, setIsDark }) {
         ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex justify-between items-center mb-10">
-          <Link to="/" className="text-[10px] font-black text-blue-600 uppercase tracking-widest">← Hlavní menu</Link>
-          <button onClick={() => setIsMenuOpen(false)} className="text-zinc-400 hover:text-red-500 transition-colors p-2 text-xl font-bold">✕</button>
+          <Link to="/" className="text-[10px] font-black text-blue-600 uppercase tracking-widest">← Domů</Link>
+          <button onClick={() => setIsMenuOpen(false)} className="text-zinc-400 p-2 text-xl font-bold">✕</button>
         </div>
         
         <h2 className="text-xl font-black mb-8 uppercase tracking-tighter leading-tight text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-900 pb-6">{tema.titul}</h2>
@@ -144,7 +144,7 @@ function TemaLayout({ isDark, setIsDark }) {
             <Link 
               key={p.id} 
               to={`/${tema.id}/${p.id}`} 
-              className={`block text-[10px] font-black uppercase tracking-widest py-3 px-4 rounded-xl transition-all ${podtemaId === p.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
+              className={`block text-[10px] font-black uppercase tracking-widest py-3 px-4 rounded-xl transition-all ${podtemaId === p.id ? 'bg-blue-600 text-white shadow-lg' : 'text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900'}`}
             >
               {p.titul}
             </Link>
@@ -152,20 +152,17 @@ function TemaLayout({ isDark, setIsDark }) {
         </nav>
       </aside>
 
-      {/* HLAVNÍ OBSAH */}
       <main className="flex-1 max-w-4xl mx-auto p-6 md:p-16 lg:p-24 w-full">
-        
-        {/* FIXNÍ LIŠTA S TLAČÍTKEM MENU */}
+        {/* HORNÍ NAVIGAČNÍ PANEL */}
         <div className="flex justify-between items-center mb-12">
           <button 
             onClick={() => setIsMenuOpen(true)}
-            className="group flex items-center gap-3 px-5 py-3 bg-zinc-100 dark:bg-zinc-900 hover:bg-blue-600 hover:text-white transition-all rounded-2xl border border-zinc-200 dark:border-zinc-800"
+            className="flex items-center gap-3 px-5 py-3 bg-zinc-100 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 font-black text-[10px] uppercase tracking-widest shadow-sm"
           >
-            <span className="text-lg">☰</span>
-            <span className="text-[10px] font-black uppercase tracking-widest">Seznam lekcí</span>
+            ☰ Menu lekcí
           </button>
           <div className="text-right">
-             <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.3em] block mb-1 italic">Postup</span>
+             <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.3em] block mb-1">Postup</span>
              <div className="w-24 h-1 bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-600 transition-all" style={{ width: `${((tema.podtemata.indexOf(podtema) + 1) / tema.podtemata.length) * 100}%` }}></div>
              </div>
@@ -173,7 +170,7 @@ function TemaLayout({ isDark, setIsDark }) {
         </div>
 
         <header className="mb-12">
-            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] block mb-4 italic">Aktuální kapitola</span>
+            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] block mb-4 italic">Kapitola</span>
             <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-zinc-900 dark:text-white leading-[0.95]">{podtema.titul}</h1>
         </header>
 
@@ -188,7 +185,7 @@ function TemaLayout({ isDark, setIsDark }) {
   );
 }
 
-// --- HLAVNÍ STRÁNKA ---
+// --- HLAVNÍ STRÁNKA (PŘEHLED) ---
 function Home({ isDark, setIsDark }) {
   return (
     <div className="min-h-screen bg-white dark:bg-black p-8 md:p-24 transition-colors">
@@ -198,11 +195,8 @@ function Home({ isDark, setIsDark }) {
             <span className="text-blue-600 font-black text-[10px] uppercase tracking-[0.5em] block mb-2 italic">Student Portal</span>
             <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none uppercase">Účto</h1>
           </div>
-          <button 
-            onClick={() => setIsDark(!isDark)} 
-            className="mb-2 p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:border-blue-500 transition-all shadow-sm"
-          >
-            {isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}
+          <button onClick={() => setIsDark(!isDark)} className="mb-2 p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            {isDark ? '🌙 Dark' : '☀️ Light'}
           </button>
         </header>
 
@@ -218,7 +212,7 @@ function Home({ isDark, setIsDark }) {
             >
               <div>
                 <span className={`text-[10px] font-black uppercase tracking-widest mb-4 block ${t.id === 'priklady-uctovani' ? 'text-white/60' : 'text-blue-600'}`}>Modul {idx + 1}</span>
-                <h2 className="text-4xl font-black uppercase tracking-tighter leading-tight transition-colors group-hover:text-blue-600">
+                <h2 className="text-4xl font-black uppercase tracking-tighter leading-tight group-hover:text-blue-600 transition-colors">
                   {t.titul}
                 </h2>
               </div>
